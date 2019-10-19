@@ -49,14 +49,6 @@ export const switchLable = () => {
     }
 }
 
-export const SET_TIMER = 'SET_TIMER'
-export const setTimer = (value) => {
-    return {
-        type: SET_TIMER,
-        value
-    }
-}
-
 export const SWITCH_RUNNING = 'SWITCH_RUNNING'
 export const switchRunning = () => {
     return {
@@ -68,14 +60,6 @@ export const RESET = 'RESET'
 export const reset = () => {
     return {
         type: RESET
-    }
-}
-
-export const PASS_TIMER_ID = 'PASS_TIMER_ID'
-export const passTimerID = (value) => {
-    return {
-        type: PASS_TIMER_ID,
-        value
     }
 }
 

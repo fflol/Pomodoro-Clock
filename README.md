@@ -1,68 +1,92 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Pomodoro Clock
 
-## Available Scripts
+A simple practice project from FCC.
 
-In the project directory, you can run:
 
-### `npm start`
+## tech stack
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+* React, hooks, all functional components
+* Redux, > not nesesary, just for fun
+* PropTypes
+* Moment.js
+* Material UI
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
 
-### `npm test`
+## Folder structure:
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+    .
+    ├── > node_modules
+    ├── > public    
+    │       ├── index.html              
+    │       └── robots.txt                            
+    ├── > src
+    │       ├── > actions             # Redux action creators
+    │       ├── > components          # React components
+    │       ├── > config              # configs, only has a beep sound URL
+    │       ├── > hooks               # custom hooks, only has Dan Abramov's useInterval 
+    │       ├── > reducers            # Redux reducers
+    │       ├── > store               # Redux store
+    │       ├── App.js                # putting components together
+    │       ├── App.test.js                 
+    │       ├── index.js              # renders App into index.html               
+    │       └── serviceWorker.js
+    ├── .gitignore
+    ├── package-lock.json
+    ├── package.json
+    └── README.md
 
-### `npm run build`
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## app logic
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+First of all, here's what's in the Redux store:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```
+sessionLength(pin): "25"
+breakLength(pin): "5"
+timerIsSession(pin): true
+running(pin): false
+```
 
-### `npm run eject`
+All logics are in **Timer** component.
+Besides the states from Redux, Timer holds these data:
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+```
+- timer, a state
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- audio, an useRef for <audio> tag control
 
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+- handleReset, a func. 
+    a: It fires an action creator, 
+    b: set timer back to the initial value
+    c: stop and reload the audio(seems audio only have a pause() method, not stop()).
+```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+here's how it acturally works:
 
-## Learn More
+```
+- useInterval is a custom hook from Dan Abramov
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+    a: **running** state switches to **true**, the component refreshes, this hook receives new props and starts to decrease the value of **timer** by 1000, every 1000ms.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+    b: **timer** state is updated, it causes the component to re-render. Diff algorithm checks, only **timer** is changed, only update the **h3** node, everything else stays the same. 
 
-### Code Splitting
+    c: when **running** switches to **false**, the hook stops decreasing
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+-----------------------------
 
-### Analyzing the Bundle Size
+- useEffect 1: 
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+    a: When timer is decreased to 0, fire action creator switchLable(), Redux changes **timerIsSession** to false. 
 
-### Making a Progressive Web App
+    b: play the beep sound.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+    c: because **timerIsSession** is changed, component re-renders
 
-### Advanced Configuration
+-----------------------------
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
+- useEffect 2:
 
-### Deployment
+    a: once **timerIsSession** is changed, **timer** is set to initial value, either it's session or break
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+    b: sessionLength and breakLength will cause **timer** to change as well. not sure if it's a good idea, user exp wise
+```

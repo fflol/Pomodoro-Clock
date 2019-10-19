@@ -1,0 +1,1 @@
+export const ringURL = 'https://goo.gl/65cBl1'
